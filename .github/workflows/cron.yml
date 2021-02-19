@@ -1,0 +1,32 @@
+name: Cron contributter
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "1 15 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MY_SCREEN_NAME: egpl0
+      MY_LANGUAGE: ja
+      CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
+      CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+    steps:
+      - name: Setup tweet.sh
+        run: |
+          apt install curl jq nkf openssl -y
+          curl -s https://raw.githubusercontent.com/piroor/tweet.sh/trunk/tweet.sh > tweet.sh
+          chmod +x tweet.sh
+      - name: Setup contributter.sh
+        run: |
+          curl -s https://raw.githubusercontent.com/eggplants/contributter.sh/main/contributter > contributter.sh
+          chmod +x contributter.sh
+      - name: Change Name
+        run: |
+          ./tweet.sh post "$(./contrubutter.sh eggplants)"
