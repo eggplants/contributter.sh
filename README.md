@@ -1,4 +1,7 @@
 # contributter.sh
+
+[![Cron contributter](https://github.com/eggplants/contributter.sh/actions/workflows/cron.yml/badge.svg)](https://github.com/eggplants/contributter.sh/actions/workflows/cron.yml)
+
 Contributter on Bash
 
 ## Install
