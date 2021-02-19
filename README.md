@@ -48,6 +48,13 @@ $ twurl authorize \
 $ twurl -X POST -d "status=$(contributter eggplants)" /1.1/statuses/update.json
 ```
 
+- cron
+
+```bash
+$ crontab -e
+1 0 * * *       twurl -X POST -d "status=$(contributter eggplants)" /1.1/statuses/update.json
+```
+
 ## License
 
 MIT
