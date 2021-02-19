@@ -29,4 +29,5 @@ jobs:
           chmod +x contributter.sh
       - name: Change Name
         run: |
+          echo ${MY_SCREEN_NAME}
           ./tweet.sh post "$(./contributter.sh eggplants)"
