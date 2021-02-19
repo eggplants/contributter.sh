@@ -1,9 +1,6 @@
 name: Cron contributter
 
 on:
-  push:
-    branches:
-      - master
   schedule:
     - cron: "1 15 * * *"
 
