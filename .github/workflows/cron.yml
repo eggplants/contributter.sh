@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Setup tweet.sh
         run: |
-          apt install curl jq nkf openssl -y
+          sudo apt install curl jq nkf openssl -y
           curl -s https://raw.githubusercontent.com/piroor/tweet.sh/trunk/tweet.sh > tweet.sh
           chmod +x tweet.sh
       - name: Setup contributter.sh
