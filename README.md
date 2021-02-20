@@ -58,6 +58,41 @@ $ crontab -e
 1 0 * * *       twurl -X POST -d "status=$(contributter eggplants)" /1.1/statuses/update.json
 ```
 
+- post on Twitter with GitHub Action at 00:01 JST
+
+```yml
+name: Cron contributter
+
+on:
+  schedule:
+    - cron: "1 15 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MY_SCREEN_NAME: egpl0
+      MY_LANGUAGE: ja
+      CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
+      CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+    steps:
+      - name: Setup tweet.sh
+        run: |
+          sudo apt install curl jq nkf openssl -y
+          curl -s https://raw.githubusercontent.com/piroor/tweet.sh/trunk/tweet.sh > tweet.sh
+          chmod +x tweet.sh
+      - name: Setup contributter.sh
+        run: |
+          curl -s https://raw.githubusercontent.com/eggplants/contributter.sh/master/contributter > contributter.sh
+          chmod +x contributter.sh
+      - name: Post on Twitter
+        run: |
+          echo ${MY_SCREEN_NAME}
+          ./tweet.sh post "$(./contributter.sh eggplants)"
+```
+
 ## License
 
 MIT
