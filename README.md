@@ -58,7 +58,7 @@ $ crontab -e
 1 0 * * *       twurl -X POST -d "status=$(contributter eggplants)" /1.1/statuses/update.json
 ```
 
-- post on Twitter with GitHub Action at 00:01 JST
+- post on Twitter with GitHub Actions at 00:01 JST
 
 ```yml
 name: Cron contributter
