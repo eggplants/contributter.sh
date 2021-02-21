@@ -1,6 +1,9 @@
 name: Cron contributter
 
 on:
+  push:
+    branches:
+      - master
   schedule:
     - cron: "1 15 * * *"
 
@@ -27,4 +30,4 @@ jobs:
       - name: Post on Twitter
         run: |
           echo ${MY_SCREEN_NAME}
-          ./tweet.sh post "$(./contributter.sh eggplants)"
+          ./tweet.sh post "$(./contributter.sh eggplants 0)"
