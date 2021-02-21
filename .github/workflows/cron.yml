@@ -34,4 +34,4 @@ jobs:
       - name: Post on Twitter
         run: |
           echo ${MY_SCREEN_NAME}
-          ./tweet.sh post "$(./contributter.sh eggplants 0)"
+          ./tweet.sh post "$(./contributter.sh eggplants)"
