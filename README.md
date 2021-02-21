@@ -64,6 +64,9 @@ $ crontab -e
 name: Cron contributter
 
 on:
+  push:
+    branches:
+      - master
   schedule:
     - cron: "1 15 * * *"
 
@@ -77,7 +80,11 @@ jobs:
       CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
       ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+      TZ: 'Asia/Tokyo'
     steps:
+      - name: Check date
+        run: |
+          date
       - name: Setup tweet.sh
         run: |
           sudo apt install curl jq nkf openssl -y
