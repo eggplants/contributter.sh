@@ -22,7 +22,8 @@ contributter(){
       | tac \
       | grep ContributionCalendar-day \
       | sed -nr "$[6+day_before]s/.*data-count=\"([0-9]+)\".*/\\1/p"
-  ) #contributter_report"
+  )
+  #contributter_report"
 }
 
 contributter $@
