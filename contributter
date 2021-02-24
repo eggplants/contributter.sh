@@ -19,8 +19,7 @@ contributter(){
   echo "${user} さんの ${target_date//-//} の contribution 数: $(
     curl -s https://github.com/users/${user}/contributions \
       | grep -oP "(?<=data-count=\")[0-9]+(?=\" data-date=\"${target_date})"
-  )
-  #contributter_report"
+  ) #contributter_report"
 }
 
 contributter $@
