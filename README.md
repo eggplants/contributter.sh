@@ -7,7 +7,7 @@ Contributter on Bash
 ## Install
 
 ```bash
-$ wget -nv https://raw.githubusercontent.com/eggplants/contributter.sh/main/contributter
+$ wget -nv https://git.io/Jz1lb -O contributter
 $ sudo install -m 0755 contributter /usr/local/bin/contributter
 $ rm contributter
 ```
