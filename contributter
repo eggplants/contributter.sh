@@ -14,13 +14,14 @@ A
 contributter(){
   { (($#<1)) || (($#>2));} && usage && return 1
 
-  local user="$1" day_before="${2-1}"
-  local target_date="$(date +%Y-%m-%d -d "${day_before} day ago")"
+  local user target_date
+  user="$1" day_before="${2-1}"
+  target_date="$(date +%Y-%m-%d -d "${day_before} day ago")"
   echo "${user} さんの ${target_date//-//} の contribution 数: $(
-    curl -s https://github.com/users/${user}/contributions \
-      | grep -oP "(?<=data-count=\")[0-9]+(?=\" data-date=\"${target_date})"
+    curl -s "https://github.com/users/${user}/contributions" \
+      | sed -nE "/data-date=\"${target_date}\"/s/^.*data-count=\"([0-9]+)\".*$/\1/p"
   ) #contributter_report"
 }
 
-contributter $@
+contributter "$@"
 exit $?
