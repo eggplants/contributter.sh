@@ -20,7 +20,8 @@ contributter(){
   echo "${user} さんの ${target_date//-//} の contribution 数: $(
     curl -s "https://github.com/users/${user}/contributions" \
       | sed -nE "/data-date=\"${target_date}\"/s/^.*data-count=\"([0-9]+)\".*$/\1/p"
-  ) #contributter_report"
+  )"
+  echo "#contributter_report"
 }
 
 contributter "$@"
