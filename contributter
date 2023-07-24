@@ -19,7 +19,7 @@ contributter(){
   target_date="$(date +%Y-%m-%d -d "${day_before} day ago")"
   echo "${user} さんの ${target_date//-//} の contribution 数: $(
     curl -s "https://github.com/users/${user}/contributions" \
-      | sed -nE "/data-date=\"${target_date}\"/s/^.*data-count=\"([0-9]+)\".*$/\1/p"
+      | sed -nE "/data-date=\"${target_date}\"/s/^.*([0-9]+|No) contribution.*$/\1/p" | sed 's/No/0/'
   )"
   echo "#contributter_report"
 }
