@@ -11,16 +11,47 @@ Args:
 A
 }
 
+count_by_gh(){
+  local user="$1" target_date="$2" from to
+  from="$(date +%Y-%m-%dT00:00:00Z -d "${target_date} 1 day ago")"
+  to="$(date +%Y-%m-%dT00:00:00Z -d "${target_date} 1 day")"
+  gh api graphql \
+    -F user="$user" -F from="$from" -F to="$to" \
+    -f query='
+      query($user: String!, $from: DateTime!, $to: DateTime!) {
+        user(login: $user) {
+          contributionsCollection(from: $from, to: $to) {
+            contributionCalendar {
+              weeks { contributionDays { date contributionCount } }
+            }
+          }
+        }
+      }' \
+    --jq ".data.user.contributionsCollection.contributionCalendar.weeks[].contributionDays[]
+          | select(.date == \"${target_date}\") | .contributionCount"
+}
+
+count_by_curl(){
+  local user="$1" target_date="$2" html id
+  html="$(curl -fsSL "https://github.com/users/${user}/contributions")" || return 1
+  id="$(grep -oE "<td[^>]*data-date=\"${target_date}\"[^>]*>" <<<"$html" \
+    | grep -oE 'id="[^"]+"' | sed -E 's/id="(.*)"/\1/')"
+  [[ -z "$id" ]] && return 1
+  grep -oE "<tool-tip[^>]*for=\"${id}\"[^>]*>[^<]*" <<<"$html" \
+    | sed -E 's/^.*>([0-9]+|No) contributions?.*$/\1/; s/^No$/0/'
+}
+
 contributter(){
   { (($#<1)) || (($#>2));} && usage && return 1
 
-  local user target_date
+  local user day_before target_date count
   user="$1" day_before="${2-1}"
   target_date="$(date +%Y-%m-%d -d "${day_before} day ago")"
-  echo "${user} さんの ${target_date//-//} の contribution 数: $(
-    curl -s "https://github.com/users/${user}/contributions" \
-      | sed -nE "/data-date=\"${target_date}\"/s/^.*([0-9]+|No) contribution.*$/\1/p" | sed 's/No/0/'
-  )"
+  if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
+    count="$(count_by_gh "$user" "$target_date")"
+  fi
+  [[ -z "$count" ]] && count="$(count_by_curl "$user" "$target_date")"
+  echo "${user} さんの ${target_date//-//} の contribution 数: ${count:-?}"
   echo "#contributter_report"
 }
 
