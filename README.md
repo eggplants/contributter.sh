@@ -16,10 +16,13 @@ rm contributter
 $ contributter
 contributter - Contributter(https://contributter.potato4d.me) on Tarminal
 
-Usage: contributter <GH-USERNAME> <DAY-BEFORE>
+Usage: contributter [-m] <GH-USERNAME> <DAY-BEFORE|MONTH-BEFORE>
+Options:
+- -m           count contributions of the whole month
 Args:
-- GH-USERNAME GitHub's Username
-- DAY-BEFORE  n days ago (default: 1)
+- GH-USERNAME  GitHub's Username
+- DAY-BEFORE   n days ago (default: 1)
+- MONTH-BEFORE n months ago, with -m (default: 1)
 
 $ contributter eggplants
 eggplants さんの 2021/02/18 の contribution 数: 1 #contributter_report
@@ -27,6 +30,10 @@ eggplants さんの 2021/02/18 の contribution 数: 1 #contributter_report
 # n days before
 $ contributter eggplants 7
 eggplants さんの 2021/02/12 の contribution 数: 14 #contributter_report
+
+# whole month (last month)
+$ contributter -m eggplants
+eggplants さんの 2021/01 の contribution 数: 120 #contributter_report
 ```
 
 ## License

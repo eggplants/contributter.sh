@@ -4,17 +4,19 @@ usage(){
 cat<<'A'
 contributter - Contributter(https://contributter.potato4d.me) on Tarminal
 
-Usage: contributter <GH-USERNAME> <DAY-BEFORE>
+Usage: contributter [-m] <GH-USERNAME> <DAY-BEFORE|MONTH-BEFORE>
+Options:
+- -m           count contributions of the whole month
 Args:
-- GH-USERNAME GitHub's Username
-- DAY-BEFORE  n days ago (default: 1)
+- GH-USERNAME  GitHub's Username
+- DAY-BEFORE   n days ago (default: 1)
+- MONTH-BEFORE n months ago, with -m (default: 1)
 A
 }
 
+# sum contributions of the days whose date starts with $2 (YYYY-MM-DD or YYYY-MM)
 count_by_gh(){
-  local user="$1" target_date="$2" from to
-  from="$(date +%Y-%m-%dT00:00:00Z -d "${target_date} 1 day ago")"
-  to="$(date +%Y-%m-%dT00:00:00Z -d "${target_date} 1 day")"
+  local user="$1" prefix="$2" from="$3" to="$4"
   gh api graphql \
     -F user="$user" -F from="$from" -F to="$to" \
     -f query='
@@ -27,31 +29,44 @@ count_by_gh(){
           }
         }
       }' \
-    --jq ".data.user.contributionsCollection.contributionCalendar.weeks[].contributionDays[]
-          | select(.date == \"${target_date}\") | .contributionCount"
+    --jq "[.data.user.contributionsCollection.contributionCalendar.weeks[].contributionDays[]
+          | select(.date | startswith(\"${prefix}\")) | .contributionCount]
+          | if length == 0 then empty else add end"
 }
 
 count_by_curl(){
-  local user="$1" target_date="$2" html id
+  local user="$1" prefix="$2" html ids id
   html="$(curl -fsSL "https://github.com/users/${user}/contributions")" || return 1
-  id="$(grep -oE "<td[^>]*data-date=\"${target_date}\"[^>]*>" <<<"$html" \
+  ids="$(grep -oE "<td[^>]*data-date=\"${prefix}[^\"]*\"[^>]*>" <<<"$html" \
     | grep -oE 'id="[^"]+"' | sed -E 's/id="(.*)"/\1/')"
-  [[ -z "$id" ]] && return 1
-  grep -oE "<tool-tip[^>]*for=\"${id}\"[^>]*>[^<]*" <<<"$html" \
-    | sed -E 's/^.*>([0-9]+|No) contributions?.*$/\1/; s/^No$/0/'
+  [[ -z "$ids" ]] && return 1
+  while read -r id; do
+    grep -oE "<tool-tip[^>]*for=\"${id}\"[^>]*>[^<]*" <<<"$html" \
+      | sed -E 's/^.*>([0-9]+|No) contributions?.*$/\1/; s/^No$/0/'
+  done <<<"$ids" | awk '{s+=$1} END{print s}'
 }
 
 contributter(){
+  local monthly=0
+  [[ "$1" == "-m" ]] && monthly=1 && shift
   { (($#<1)) || (($#>2));} && usage && return 1
 
-  local user day_before target_date count
-  user="$1" day_before="${2-1}"
-  target_date="$(date +%Y-%m-%d -d "${day_before} day ago")"
-  if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
-    count="$(count_by_gh "$user" "$target_date")"
+  local user before prefix from to count
+  user="$1" before="${2-1}"
+  if ((monthly)); then
+    prefix="$(date +%Y-%m -d "$(date +%Y-%m-01) ${before} month ago")"
+    from="$(date +%Y-%m-%dT00:00:00Z -d "${prefix}-01 1 day ago")"
+    to="$(date +%Y-%m-%dT00:00:00Z -d "${prefix}-01 1 month 1 day")"
+  else
+    prefix="$(date +%Y-%m-%d -d "${before} day ago")"
+    from="$(date +%Y-%m-%dT00:00:00Z -d "${prefix} 1 day ago")"
+    to="$(date +%Y-%m-%dT00:00:00Z -d "${prefix} 1 day")"
   fi
-  [[ -z "$count" ]] && count="$(count_by_curl "$user" "$target_date")"
-  echo "${user} さんの ${target_date//-//} の contribution 数: ${count:-?}"
+  if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
+    count="$(count_by_gh "$user" "$prefix" "$from" "$to")" || count=""
+  fi
+  [[ -z "$count" ]] && count="$(count_by_curl "$user" "$prefix")"
+  echo "${user} さんの ${prefix//-//} の contribution 数: ${count:-?}"
   echo "#contributter_report"
 }
 
